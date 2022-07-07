@@ -15,29 +15,28 @@
 #define AWHK_RUN_KEY			L"Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 #define AWHK_RUN_ENTRY_NAME		L"arb.clipboard.reader"
 
-class CMainDlg final : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
+class c_main_dlg final : public CDialogImpl<c_main_dlg>, public CUpdateUI<c_main_dlg>,
                        public CMessageFilter, public CIdleHandler
 {
-private:
 	//used in OnHotkey
-	ATOM m_hotKey{};
-	DWORD m_dwOldTick = 0;
-	DWORD m_dwCurrentTick = 0;
+	ATOM m_hot_key_{};
+	DWORD m_dw_old_tick_ = 0;
+	DWORD m_dw_current_tick_ = 0;
 	int m_hotkeyValid = 0;
-	bool m_autorun = false;
+	bool m_autorun_ = false;
 
-	std::vector<HICON> m_animate_icons;
-	int m_animate_item = 0;
+	std::vector<HICON> m_animate_icons_;
+	int m_animate_item_ = 0;
 
-	CTaskBarIcon m_ti;
-	std::queue<std::string> m_messages;
+	CTaskBarIcon m_ti_;
+	std::queue<std::string> m_messages_;
 		
 public:
 	enum { IDD = IDD_MAINDLG };
 
-	BOOL PreTranslateMessage(MSG* pMsg) override
+	BOOL PreTranslateMessage(MSG* p_msg) override
 	{
-		return CWindow::IsDialogMessage(pMsg);
+		return CWindow::IsDialogMessage(p_msg);
 	}
 
 	BOOL OnIdle() override
@@ -58,77 +57,72 @@ public:
 		COMMAND_ID_HANDLER(ID_TASKBAR_EXIT, OnExit)
 		COMMAND_ID_HANDLER(ID_ABOUT, OnAbout)
 		COMMAND_ID_HANDLER(IDOK, OnOK)
-		CHAIN_MSG_MAP_MEMBER(m_ti)
-		TASKBAR_MESSAGE_HANDLER(m_ti, WM_LBUTTONDOWN, OnTaskIconClick)
+		CHAIN_MSG_MAP_MEMBER(m_ti_)
+		TASKBAR_MESSAGE_HANDLER(m_ti_, WM_LBUTTONDOWN, OnTaskIconClick)
 		COMMAND_HANDLER(IDC_AUTORUN, BN_CLICKED, OnAutorunClick)		
 	END_MSG_MAP()
 
 
-	LRESULT OnAutorunClick(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
+	LRESULT OnAutorunClick(const WORD w_notify_code, const WORD w_id, const HWND h_wnd_ctl, BOOL& b_handled)
 	{		
-		m_autorun = IsDlgButtonChecked(IDC_AUTORUN) == BST_CHECKED;
+		m_autorun_ = IsDlgButtonChecked(IDC_AUTORUN) == BST_CHECKED;
 		
-		if (m_autorun)
+		if (m_autorun_)
 			EnableAutorun();
 		else
 			DisableAutorun();
 
-		AtlTrace("wNotifyCode: %i, wID: %i, hWndCtl: %i, m_autorun: %i\n", wNotifyCode, wID, hWndCtl, m_autorun);
+		AtlTrace("wNotifyCode: %i, w_id: %i, hWndCtl: %i, m_autorun: %i\n", w_notify_code, w_id, h_wnd_ctl, m_autorun_);
 		return 0;
 	}
 		
-// Handler prototypes (uncomment arguments if needed):
-//	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-//	LRESULT CommandHandler(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-//	LRESULT NotifyHandler(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
-
-	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*b_handled*/)
 	{		
 		// unregister message filtering and idle updates
-		CMessageLoop* pLoop = _Module.GetMessageLoop();
-		ATLASSERT(pLoop != NULL);
-		pLoop->RemoveMessageFilter(this);
-		pLoop->RemoveIdleHandler(this);
+		CMessageLoop* p_loop = app_module.GetMessageLoop();
+		ATLASSERT(p_loop != NULL);
+		p_loop->RemoveMessageFilter(this);
+		p_loop->RemoveIdleHandler(this);
 
 		return 0;
 	}
 
-	LRESULT OnOK(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+	LRESULT OnOK(WORD /*wNotifyCode*/, WORD w_id, HWND /*hWndCtl*/, BOOL& /*b_handled*/)
 	{
 		ShowWindow(SW_HIDE);
 		return 0;
 	}
 
-	LRESULT OnAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+	LRESULT OnAbout(WORD /*wNotifyCode*/, WORD /*w_id*/, HWND /*hWndCtl*/, BOOL& /*b_handled*/)
 	{
 		ShowWindow(SW_SHOW);
 		return TRUE;
 	}
-	LRESULT OnExit(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+	LRESULT OnExit(WORD /*wNotifyCode*/, const WORD w_id, HWND /*hWndCtl*/, BOOL& /*b_handled*/)
 	{
-		CloseDialog(wID);
+		CloseDialog(w_id);
 		return TRUE;
 	}
 
-	LRESULT OnTimer(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
+	LRESULT OnTimer(UINT /*uMsg*/, WPARAM w_param, LPARAM /*lParam*/, BOOL& b_handled)
 	{
-		if (m_animate_item >= m_animate_icons.size())
-			m_animate_item = 0;
+		if (m_animate_item_ >= m_animate_icons_.size())
+			m_animate_item_ = 0;
 
-		auto icn = CloneIcon(m_animate_icons[m_animate_item]);
+		const auto icn = CloneIcon(m_animate_icons_[m_animate_item_]);
 
-		m_ti.ChangeIcon(icn);
-		m_animate_item++;
+		m_ti_.ChangeIcon(icn);
+		m_animate_item_++;
 
 		return TRUE;
 	}
 
-	LRESULT OnHotkey(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
+	LRESULT OnHotkey(UINT /*uMsg*/, const WPARAM w_param, LPARAM /*lParam*/, BOOL& b_handled)
 	{
-		if (wParam == m_hotKey)
+		if (w_param == m_hot_key_)
 		{
-			m_dwCurrentTick = GetTickCount();
-			if (m_dwCurrentTick - m_dwOldTick <= 350)
+			m_dw_current_tick_ = GetTickCount();
+			if (m_dw_current_tick_ - m_dw_old_tick_ <= 350)
 				m_hotkeyValid++;
 			else
 				m_hotkeyValid = 0;
@@ -136,57 +130,57 @@ public:
 			if (m_hotkeyValid == 2)
 				ReadAndQueueClipboard();
 
-			m_dwOldTick = m_dwCurrentTick;
+			m_dw_old_tick_ = m_dw_current_tick_;
 		}
 
-		bHandled = FALSE;
+		b_handled = FALSE;
 		return TRUE;
 	}
 
 
-	LRESULT OnSize(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
+	LRESULT OnSize(UINT /*uMsg*/, const WPARAM w_param, LPARAM /*lParam*/, BOOL& b_handled)
 	{
-		if (wParam == SIZE_MINIMIZED) ShowWindow(SW_HIDE);
-		bHandled = FALSE;
+		if (w_param == SIZE_MINIMIZED) ShowWindow(SW_HIDE);
+		b_handled = FALSE;
 		return 0;
 	}
 
-	LRESULT OnTaskIconClick(LPARAM /*uMsg*/, BOOL& /*bHandled*/)
+	LRESULT OnTaskIconClick(LPARAM /*uMsg*/, BOOL& /*b_handled*/)
 	{
 		ShowWindow(SW_SHOW);
 		return TRUE;
 	}
 
-	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*w_param*/, LPARAM /*lParam*/, BOOL& /*b_handled*/)
 	{
 		// center the dialog on the screen
 		CenterWindow();
 
-		m_autorun = IsAutorunEnabled();
-		CheckDlgButton(IDC_AUTORUN, m_autorun ? BST_CHECKED : BST_UNCHECKED);
+		m_autorun_ = IsAutorunEnabled();
+		CheckDlgButton(IDC_AUTORUN, m_autorun_ ? BST_CHECKED : BST_UNCHECKED);
 		
 
 		//Install taskbar
-		HICON hAnimateIcon = AtlLoadIconImage(IDI_ICON1, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
-		m_animate_icons.push_back(hAnimateIcon);
-		hAnimateIcon = AtlLoadIconImage(IDI_ICON2, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
-		m_animate_icons.push_back(hAnimateIcon);
-		hAnimateIcon = AtlLoadIconImage(IDI_ICON3, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
-		m_animate_icons.push_back(hAnimateIcon);
-		hAnimateIcon = AtlLoadIconImage(IDI_ICON4, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
-		m_animate_icons.push_back(hAnimateIcon);
-		m_ti.Install(m_hWnd, 1, IDR_TASKBAR);
+		HICON h_animate_icon = AtlLoadIconImage(IDI_ICON1, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
+		m_animate_icons_.push_back(h_animate_icon);
+		h_animate_icon = AtlLoadIconImage(IDI_ICON2, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
+		m_animate_icons_.push_back(h_animate_icon);
+		h_animate_icon = AtlLoadIconImage(IDI_ICON3, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
+		m_animate_icons_.push_back(h_animate_icon);
+		h_animate_icon = AtlLoadIconImage(IDI_ICON4, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
+		m_animate_icons_.push_back(h_animate_icon);
+		m_ti_.Install(m_hWnd, 1, IDR_TASKBAR);
 				
 
 		// set icons
-		HICON hIcon = AtlLoadIconImage(IDR_MAINFRAME, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
-		SetIcon(hIcon, TRUE);
-		HICON hIconSmall = AtlLoadIconImage(IDR_MAINFRAME, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXSMICON),
-		                                    GetSystemMetrics(SM_CYSMICON));
-		SetIcon(hIconSmall, FALSE);
+		const auto h_icon = AtlLoadIconImage(IDR_MAINFRAME, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
+		SetIcon(h_icon, TRUE);
+		const auto h_icon_small = AtlLoadIconImage(IDR_MAINFRAME, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXSMICON),
+		                                          GetSystemMetrics(SM_CYSMICON));
+		SetIcon(h_icon_small, FALSE);
 
 		// register object for message filtering and idle updates
-		CMessageLoop* pLoop = _Module.GetMessageLoop();
+		CMessageLoop* pLoop = app_module.GetMessageLoop();
 		ATLASSERT(pLoop != NULL);
 		pLoop->AddMessageFilter(this);
 		pLoop->AddIdleHandler(this);
@@ -196,16 +190,16 @@ public:
 		RegisterHotkey();
 		
 		//Fire and forget backgroup thread to read
-		std::thread([this]()
+		std::thread([this]
 		{
 			bool reset = false;
 			while (true)
 			{
-				while (!m_messages.empty())
+				while (!m_messages_.empty())
 				{
 					SetTimer(WM_ICON_ANIMATE_START, 500, nullptr);
 
-					auto msg = GetNextMessage();
+					const auto msg = GetNextMessage();
 					CSpeech spk(msg);
 					spk.TextToSpeech();
 
@@ -215,9 +209,9 @@ public:
 				Sleep(500);
 				if (reset == true)
 				{
-					HICON icn = AtlLoadIconImage(IDR_TASKBAR, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON),
-					                             GetSystemMetrics(SM_CYICON));
-					m_ti.ChangeIcon(icn);
+					const auto icn = AtlLoadIconImage(IDR_TASKBAR, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON),
+					                                   GetSystemMetrics(SM_CYICON));
+					m_ti_.ChangeIcon(icn);
 					reset = false;
 				}
 
@@ -227,18 +221,18 @@ public:
 		return TRUE;
 	}
 	
-	void CloseDialog(int nVal)
+	void CloseDialog(const int n_val)
 	{
 		DestroyWindow();
-		PostQuitMessage(nVal);
+		PostQuitMessage(n_val);
 	}
 
 
 private:
 	std::string GetNextMessage()
 	{
-		auto msg = m_messages.front();
-		m_messages.pop();
+		auto msg = m_messages_.front();
+		m_messages_.pop();
 
 		UpdateTaskbarTooltip();
 		
@@ -247,10 +241,10 @@ private:
 
 	LRESULT UpdateTaskbarTooltip()
 	{
-		std::wstring tskbar = L"Items Queued: " + std::to_wstring(m_messages.size());
-		m_ti.ChangeTooltip(const_cast<LPTSTR>(tskbar.c_str()));
-	
-		auto dbgstr = tskbar + L"\n";
+		const std::wstring tskbar = L"Items Queued: " + std::to_wstring(m_messages_.size());
+		m_ti_.ChangeTooltip(const_cast<LPTSTR>(tskbar.c_str()));
+
+		const auto dbgstr = tskbar + L"\n";
 		OutputDebugString(dbgstr.c_str());
 
 		return TRUE;
@@ -258,10 +252,10 @@ private:
 
 	LRESULT RegisterHotkey()
 	{
-		m_hotKey = GlobalAddAtom(L"ReadAssistAtom");
-		if (m_hotKey)
+		m_hot_key_ = GlobalAddAtom(L"ReadAssistAtom");
+		if (m_hot_key_)
 		{
-			RegisterHotKey(m_hWnd, m_hotKey, MOD_CONTROL, 0);
+			RegisterHotKey(m_hWnd, m_hot_key_, MOD_CONTROL, 0);
 		}
 
 		return TRUE;
@@ -272,44 +266,44 @@ private:
 		std::string fromClipboard;
 		if (OpenClipboard())
 		{
-			HANDLE hData = GetClipboardData(CF_TEXT);
-			auto buffer = (char*)GlobalLock(hData);
+			const auto h_data = GetClipboardData(CF_TEXT);
+			const auto buffer = static_cast<char*>(GlobalLock(h_data));
 			fromClipboard = buffer;
-			GlobalUnlock(hData);
+			GlobalUnlock(h_data);
 			CloseClipboard();
 		}
 
-		m_messages.push(fromClipboard);
+		m_messages_.push(fromClipboard);
 		UpdateTaskbarTooltip();
 
 		return TRUE;
 	}
 
-	HICON CloneIcon(HICON OriginalIcon)
+	static HICON CloneIcon(const HICON original_icon)
 	{
-		return DuplicateIcon(nullptr, OriginalIcon); //first parameter is unused
+		return DuplicateIcon(nullptr, original_icon); //first parameter is unused
 	}
 
 	bool IsAutorunEnabled()
 	{
-		HKEY hKey;
-		if (::RegOpenKeyEx(HKEY_CURRENT_USER, AWHK_RUN_KEY, 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS)
+		HKEY h_key;
+		if (::RegOpenKeyEx(HKEY_CURRENT_USER, AWHK_RUN_KEY, 0, KEY_QUERY_VALUE, &h_key) != ERROR_SUCCESS)
 			return false;
 		
-		if(::RegQueryValueEx(hKey, AWHK_RUN_ENTRY_NAME, nullptr, nullptr, nullptr, nullptr) == ERROR_FILE_NOT_FOUND)
+		if(::RegQueryValueEx(h_key, AWHK_RUN_ENTRY_NAME, nullptr, nullptr, nullptr, nullptr) == ERROR_FILE_NOT_FOUND)
 			return false;
 
-		RegCloseKey(hKey);
+		RegCloseKey(h_key);
 		return true;
 	}
 
 	BOOL DisableAutorun()
 	{
-		HKEY hKey;
-		if (::RegOpenKeyEx(HKEY_CURRENT_USER, AWHK_RUN_KEY, 0, KEY_SET_VALUE, &hKey) != ERROR_SUCCESS)
+		HKEY h_key;
+		if (::RegOpenKeyEx(HKEY_CURRENT_USER, AWHK_RUN_KEY, 0, KEY_SET_VALUE, &h_key) != ERROR_SUCCESS)
 			return FALSE;
 
-		::RegDeleteValue(hKey, AWHK_RUN_ENTRY_NAME);
+		::RegDeleteValue(h_key, AWHK_RUN_ENTRY_NAME);
 
 		return ERROR_SUCCESS;
 	}
@@ -321,27 +315,26 @@ private:
 		std::wstring regvalue(&szStartupPath[0]);
 		regvalue = L"\"" + regvalue + L"\"";
 
-		HKEY hKey;
+		HKEY h_key;
 		if (::RegOpenKeyEx(
 			HKEY_CURRENT_USER,
 			AWHK_RUN_KEY,
 			0,
 			KEY_SET_VALUE,
-			&hKey) != ERROR_SUCCESS)
+			&h_key) != ERROR_SUCCESS)
 		{
 			return FALSE;
 		}
 
-		LSTATUS ret;
-		ret = ::RegSetValueEx(
-			hKey,
+		LSTATUS ret = ::RegSetValueEx(
+			h_key,
 			AWHK_RUN_ENTRY_NAME,
 			0,
 			REG_SZ,
-			(BYTE*)regvalue.c_str(),
-			(DWORD)regvalue.size() * 2);
-
-		RegCloseKey(hKey);
+			reinterpret_cast<BYTE const*>(regvalue.c_str()),
+			static_cast<DWORD>(regvalue.size()) * 2);
+				
+		RegCloseKey(h_key);
 
 		return ERROR_SUCCESS;
 	}

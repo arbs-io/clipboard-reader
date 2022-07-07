@@ -2,20 +2,19 @@
 
 class CSpeech
 {
-private:
-	std::string m_message;
+	std::string message_;
 	
 public:
-	CSpeech(std::string message);
+	explicit CSpeech(std::string message);
 
 	~CSpeech() noexcept;
 
 	LRESULT TextToSpeech();
 };
 
-inline CSpeech::CSpeech(std::string message): m_message(std::move(message))
+inline CSpeech::CSpeech(std::string message): message_(std::move(message))
 {
-	HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	const HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	if (FAILED(hr))
 	{
 		throw std::runtime_error("CoInitialize Failed");
@@ -29,15 +28,15 @@ inline CSpeech::~CSpeech() noexcept
 
 inline LRESULT CSpeech::TextToSpeech()
 {	
-	ISpVoice * pVoice = nullptr;
-		
-	auto hr = CoCreateInstance(CLSID_SpVoice, nullptr, CLSCTX_ALL, IID_ISpVoice, (void **)&pVoice);
+	ISpVoice * p_voice = nullptr;
+
+	const auto hr = CoCreateInstance(CLSID_SpVoice, nullptr, CLSCTX_ALL, IID_ISpVoice, reinterpret_cast<void**>(&p_voice));
 	if (SUCCEEDED(hr))
 	{
-		auto nws = std::wstring(m_message.begin(), m_message.end());
-		pVoice->Speak(nws.c_str(), 0, nullptr);			
-		pVoice->Release();
-		pVoice = nullptr;
+		const auto nws = std::wstring(message_.begin(), message_.end());
+		p_voice->Speak(nws.c_str(), 0, nullptr);			
+		p_voice->Release();
+		p_voice = nullptr;
 	}
 
 	return TRUE;
