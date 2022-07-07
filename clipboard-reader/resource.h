@@ -12,7 +12,7 @@
 #define IDC_CHECK1                      1000
 #define IDC_AUTORUN                     1000
 #define ID_TASKBAR_EXIT                 32775
-#define ID_Menu                         32776
+#define ID_MENU                         32776
 #define ID_ABOUT                        32777
 
 // Next default values for new objects
