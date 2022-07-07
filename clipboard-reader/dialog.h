@@ -1,6 +1,5 @@
-// MainDlg.h : interface of the CMainDlg class
-//
-/////////////////////////////////////////////////////////////////////////////
+// Copyright (c) Andrew Butson.
+// Licensed under the MIT License.
 
 #pragma once
 

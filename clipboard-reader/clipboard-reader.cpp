@@ -1,5 +1,5 @@
-// clipboard-reader.cpp : main source file for clipboard-reader.exe
-//
+// Copyright (c) Andrew Butson.
+// Licensed under the MIT License.
 
 #include "stdafx.h"
 

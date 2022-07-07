@@ -1,3 +1,6 @@
+// Copyright (c) Andrew Butson.
+// Licensed under the MIT License.
+
 #pragma once
 
 #include <string>

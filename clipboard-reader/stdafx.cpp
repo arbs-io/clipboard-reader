@@ -1,6 +1,5 @@
-// stdafx.cpp : source file that includes just the standard includes
-//	clipboard-reader.pch will be the pre-compiled header
-//	stdafx.obj will contain the pre-compiled type information
+// Copyright (c) Andrew Butson.
+// Licensed under the MIT License.
 
 #include "stdafx.h"
 
