@@ -10,17 +10,17 @@
 #include "taskbar-icon.h"
 #include "speech.h"
 
-#define	WM_ICON_ANIMATE_START WM_APP + 1
+#define	WM_ICON_ANIMATE_START (WM_APP + 1)
 
 #define AWHK_RUN_KEY			L"Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 #define AWHK_RUN_ENTRY_NAME		L"arb.clipboard.reader"
 
-class CMainDlg : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
-		public CMessageFilter, public CIdleHandler
+class CMainDlg final : public CDialogImpl<CMainDlg>, public CUpdateUI<CMainDlg>,
+                       public CMessageFilter, public CIdleHandler
 {
 private:
 	//used in OnHotkey
-	ATOM m_hotKey;
+	ATOM m_hotKey{};
 	DWORD m_dwOldTick = 0;
 	DWORD m_dwCurrentTick = 0;
 	int m_hotkeyValid = 0;
@@ -34,13 +34,13 @@ private:
 		
 public:
 	enum { IDD = IDD_MAINDLG };
-	
-	virtual BOOL PreTranslateMessage(MSG* pMsg)
+
+	BOOL PreTranslateMessage(MSG* pMsg) override
 	{
 		return CWindow::IsDialogMessage(pMsg);
 	}
 
-	virtual BOOL OnIdle()
+	BOOL OnIdle() override
 	{
 		UIUpdateChildWindows();
 		return FALSE;
@@ -66,14 +66,14 @@ public:
 
 	LRESULT OnAutorunClick(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
 	{		
-		m_autorun = (IsDlgButtonChecked(IDC_AUTORUN) == BST_CHECKED);
+		m_autorun = IsDlgButtonChecked(IDC_AUTORUN) == BST_CHECKED;
 		
 		if (m_autorun)
 			EnableAutorun();
 		else
 			DisableAutorun();
 
-		ATL::AtlTrace("wNotifyCode: %i, wID: %i, hWndCtl: %i, m_autorun: %i\n", wNotifyCode, wID, hWndCtl, m_autorun);
+		AtlTrace("wNotifyCode: %i, wID: %i, hWndCtl: %i, m_autorun: %i\n", wNotifyCode, wID, hWndCtl, m_autorun);
 		return 0;
 	}
 		
@@ -128,7 +128,7 @@ public:
 		if (wParam == m_hotKey)
 		{
 			m_dwCurrentTick = GetTickCount();
-			if ((m_dwCurrentTick - m_dwOldTick) <= 350)
+			if (m_dwCurrentTick - m_dwOldTick <= 350)
 				m_hotkeyValid++;
 			else
 				m_hotkeyValid = 0;
@@ -167,21 +167,22 @@ public:
 		
 
 		//Install taskbar
-		HICON hAnimateIcon = AtlLoadIconImage(IDI_ICON1, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON));
+		HICON hAnimateIcon = AtlLoadIconImage(IDI_ICON1, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
 		m_animate_icons.push_back(hAnimateIcon);
-		hAnimateIcon = AtlLoadIconImage(IDI_ICON2, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON));
+		hAnimateIcon = AtlLoadIconImage(IDI_ICON2, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
 		m_animate_icons.push_back(hAnimateIcon);
-		hAnimateIcon = AtlLoadIconImage(IDI_ICON3, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON));
+		hAnimateIcon = AtlLoadIconImage(IDI_ICON3, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
 		m_animate_icons.push_back(hAnimateIcon);
-		hAnimateIcon = AtlLoadIconImage(IDI_ICON4, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON));
+		hAnimateIcon = AtlLoadIconImage(IDI_ICON4, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
 		m_animate_icons.push_back(hAnimateIcon);
 		m_ti.Install(m_hWnd, 1, IDR_TASKBAR);
 				
 
 		// set icons
-		HICON hIcon = AtlLoadIconImage(IDR_MAINFRAME, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON));
+		HICON hIcon = AtlLoadIconImage(IDR_MAINFRAME, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
 		SetIcon(hIcon, TRUE);
-		HICON hIconSmall = AtlLoadIconImage(IDR_MAINFRAME, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON));
+		HICON hIconSmall = AtlLoadIconImage(IDR_MAINFRAME, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXSMICON),
+		                                    GetSystemMetrics(SM_CYSMICON));
 		SetIcon(hIconSmall, FALSE);
 
 		// register object for message filtering and idle updates
@@ -202,7 +203,7 @@ public:
 			{
 				while (!m_messages.empty())
 				{
-					SetTimer(WM_ICON_ANIMATE_START, 500, NULL);
+					SetTimer(WM_ICON_ANIMATE_START, 500, nullptr);
 
 					auto msg = GetNextMessage();
 					CSpeech spk(msg);
@@ -214,7 +215,8 @@ public:
 				Sleep(500);
 				if (reset == true)
 				{
-					HICON icn = AtlLoadIconImage(IDR_TASKBAR, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON));
+					HICON icn = AtlLoadIconImage(IDR_TASKBAR, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON),
+					                             GetSystemMetrics(SM_CYICON));
 					m_ti.ChangeIcon(icn);
 					reset = false;
 				}
@@ -228,7 +230,7 @@ public:
 	void CloseDialog(int nVal)
 	{
 		DestroyWindow();
-		::PostQuitMessage(nVal);
+		PostQuitMessage(nVal);
 	}
 
 
@@ -246,7 +248,7 @@ private:
 	LRESULT UpdateTaskbarTooltip()
 	{
 		std::wstring tskbar = L"Items Queued: " + std::to_wstring(m_messages.size());
-		m_ti.ChangeTooltip((LPTSTR)tskbar.c_str());
+		m_ti.ChangeTooltip(const_cast<LPTSTR>(tskbar.c_str()));
 	
 		auto dbgstr = tskbar + L"\n";
 		OutputDebugString(dbgstr.c_str());
@@ -271,7 +273,7 @@ private:
 		if (OpenClipboard())
 		{
 			HANDLE hData = GetClipboardData(CF_TEXT);
-			char * buffer = (char*)GlobalLock(hData);
+			auto buffer = (char*)GlobalLock(hData);
 			fromClipboard = buffer;
 			GlobalUnlock(hData);
 			CloseClipboard();
@@ -285,7 +287,7 @@ private:
 
 	HICON CloneIcon(HICON OriginalIcon)
 	{
-		return DuplicateIcon(NULL, OriginalIcon); //first parameter is unused
+		return DuplicateIcon(nullptr, OriginalIcon); //first parameter is unused
 	}
 
 	bool IsAutorunEnabled()
@@ -294,10 +296,10 @@ private:
 		if (::RegOpenKeyEx(HKEY_CURRENT_USER, AWHK_RUN_KEY, 0, KEY_QUERY_VALUE, &hKey) != ERROR_SUCCESS)
 			return false;
 		
-		if(::RegQueryValueEx(hKey, AWHK_RUN_ENTRY_NAME, NULL, NULL, NULL, NULL) == ERROR_FILE_NOT_FOUND)
+		if(::RegQueryValueEx(hKey, AWHK_RUN_ENTRY_NAME, nullptr, nullptr, nullptr, nullptr) == ERROR_FILE_NOT_FOUND)
 			return false;
-		
-		::RegCloseKey(hKey);
+
+		RegCloseKey(hKey);
 		return true;
 	}
 
@@ -315,7 +317,7 @@ private:
 	{
 		//Auto startup
 		TCHAR szStartupPath[_MAX_PATH + 1];
-		GetModuleFileName(NULL, szStartupPath, MAX_PATH);
+		GetModuleFileName(nullptr, szStartupPath, MAX_PATH);
 		std::wstring regvalue(&szStartupPath[0]);
 		regvalue = L"\"" + regvalue + L"\"";
 
@@ -330,15 +332,16 @@ private:
 			return FALSE;
 		}
 
-		LONG ret = ::RegSetValueEx(
+		LSTATUS ret;
+		ret = ::RegSetValueEx(
 			hKey,
 			AWHK_RUN_ENTRY_NAME,
 			0,
 			REG_SZ,
 			(BYTE*)regvalue.c_str(),
-			(DWORD)regvalue.size() * 2);	//please fix...
+			(DWORD)regvalue.size() * 2);
 
-		::RegCloseKey(hKey);
+		RegCloseKey(hKey);
 
 		return ERROR_SUCCESS;
 	}
