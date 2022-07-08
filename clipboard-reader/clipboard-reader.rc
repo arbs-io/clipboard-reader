@@ -136,13 +136,13 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "FileDescription", "clipboard-reader Module"
-            VALUE "FileVersion", "1, 0, 0, 1"
-            VALUE "InternalName", "clipboard-reader"
-            VALUE "LegalCopyright", "Copyright 2016"
+            VALUE "FileDescription", "clipboard-reader@arbs.io"
+            VALUE "FileVersion", "1, 0, 0, 0"
+            VALUE "InternalName", "clipboard-reader@arbs.io"
+            VALUE "LegalCopyright", "Copyright 2022"
             VALUE "OriginalFilename", "clipboard-reader.exe"
-            VALUE "ProductName", "clipboard-reader Module"
-            VALUE "ProductVersion", "1, 0, 0, 1"
+            VALUE "ProductName", "clipboard-reader@arbs.io"
+            VALUE "ProductVersion", "1, 0, 0, 0"
         END
     END
     BLOCK "VarFileInfo"

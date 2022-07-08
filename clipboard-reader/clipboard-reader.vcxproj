@@ -109,6 +109,14 @@
       <TypeLibraryName>$(IntDir)/clipboard-reader.tlb</TypeLibraryName>
       <DllDataFileName />
     </Midl>
+    <PostBuildEvent>
+      <Command>if "$(ConfigurationName)" == "Release" (
+   echo "Build::Release: Signing...".
+   signtool.exe sign /sha1 "1b2c3f93680cb70e928e7e2292aa9a1741d0df98" /fd sha256 /d "clipboard-reader by Andrew Butson" /t "http://timestamp.digicert.com" /v "$(TargetPath)"
+) ELSE (
+   echo "Build::Debug: No signing".
+)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -142,6 +150,14 @@
       <TypeLibraryName>$(IntDir)/clipboard-reader.tlb</TypeLibraryName>
       <DllDataFileName />
     </Midl>
+    <PostBuildEvent>
+      <Command>if "$(ConfigurationName)" == "Release" (
+   echo "Build::Release: Signing...".
+   signtool.exe sign /sha1 "1b2c3f93680cb70e928e7e2292aa9a1741d0df98" /fd sha256 /d "clipboard-reader by Andrew Butson" /t "http://timestamp.digicert.com" /v "$(TargetPath)"
+) ELSE (
+   echo "Build::Debug: No signing".
+)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -172,6 +188,14 @@
       <TypeLibraryName>$(IntDir)/clipboard-reader.tlb</TypeLibraryName>
       <DllDataFileName />
     </Midl>
+    <PostBuildEvent>
+      <Command>if "$(ConfigurationName)" == "Release" (
+   echo "Build::Release: Signing...".
+   signtool.exe sign /sha1 "1b2c3f93680cb70e928e7e2292aa9a1741d0df98" /fd sha256 /d "clipboard-reader by Andrew Butson" /t "http://timestamp.digicert.com" /v "$(TargetPath)"
+) ELSE (
+   echo "Build::Debug: No signing".
+)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -201,6 +225,14 @@
       <TypeLibraryName>$(IntDir)/clipboard-reader.tlb</TypeLibraryName>
       <DllDataFileName />
     </Midl>
+    <PostBuildEvent>
+      <Command>if "$(ConfigurationName)" == "Release" (
+   echo "Build::Release: Signing...".
+   signtool.exe sign /sha1 "1b2c3f93680cb70e928e7e2292aa9a1741d0df98" /fd sha256 /d "clipboard-reader by Andrew Butson" /t "http://timestamp.digicert.com" /v "$(TargetPath)"
+) ELSE (
+   echo "Build::Debug: No signing".
+)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="clipboard-reader.cpp" />
