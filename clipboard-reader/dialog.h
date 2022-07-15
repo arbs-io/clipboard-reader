@@ -3,14 +3,6 @@
 
 #pragma once
 
-#include <atlframe.h>
-#include <locale>
-#include <queue>
-
-#include "taskbar-icon.h"
-#include "speech.h"
-#include "resource.h"
-
 #define	WM_ICON_ANIMATE_START (WM_APP + 1)
 
 #define AWHK_RUN_KEY			L"Software\\Microsoft\\Windows\\CurrentVersion\\Run"
@@ -48,24 +40,24 @@ public:
 		COMMAND_ID_HANDLER(ID_TASKBAR_EXIT, OnExit)
 		COMMAND_ID_HANDLER(ID_ABOUT, OnAbout)
 		COMMAND_ID_HANDLER(IDOK, OnOK)
-		CHAIN_MSG_MAP_MEMBER(m_ti_)
-		TASKBAR_MESSAGE_HANDLER(m_ti_, WM_LBUTTONDOWN, OnTaskIconClick)
+		CHAIN_MSG_MAP_MEMBER(taskbar_icon_)
+		TASKBAR_MESSAGE_HANDLER(taskbar_icon_, WM_LBUTTONDOWN, OnTaskIconClick)
 		COMMAND_HANDLER(IDC_AUTORUN, BN_CLICKED, OnAutorunClick)
 	END_MSG_MAP()
 
 private:
 	//used in OnHotkey
-	ATOM m_hot_key_{};
-	DWORD m_dw_old_tick_ = 0;
-	DWORD m_dw_current_tick_ = 0;
-	int m_hotkeyValid = 0;
-	bool m_autorun_ = false;
+	ATOM hot_key_{};
+	DWORD previous_tick_ = 0;
+	DWORD current_tick_ = 0;
+	int hotkey_is_valid_ = 0;
+	bool reg_autorun_ = false;
 
-	std::vector<HICON> m_animate_icons_;
-	int m_animate_item_ = 0;
+	std::vector<HICON> animate_icons_;
+	int animate_item_ = 0;
 
-	CTaskBarIcon m_ti_;
-	std::queue<std::string> m_messages_;
+	CTaskBarIcon taskbar_icon_;
+	std::queue<std::string> messages_queue_;
 
 	auto GetNextMessage() -> std::string;
 	auto UpdateTaskbarTooltip() -> LRESULT;

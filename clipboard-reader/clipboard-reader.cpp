@@ -3,16 +3,7 @@
 
 #include "stdafx.h"
 
-#include <atlframe.h>
-#include <atlctrls.h>
-#include <atldlgs.h>
-
-#include "resource.h"
-
-#include "dialog.h"
-
 CAppModule app_module;
-
 
 HRESULT Run(LPTSTR /*lpstrCmdLine*/ = nullptr, const int n_cmd_show = SW_SHOWDEFAULT)
 {

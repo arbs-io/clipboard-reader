@@ -2,35 +2,34 @@
 // Licensed under the MIT License.
 
 #include "stdafx.h"
-#include "dialog.h"
 
 
-BOOL CMainDlg::PreTranslateMessage(MSG* p_msg)
+auto CMainDlg::PreTranslateMessage(MSG* p_msg) -> BOOL
 {
 	return CWindow::IsDialogMessage(p_msg);
 }
 
-BOOL CMainDlg::OnIdle()
+auto CMainDlg::OnIdle() -> BOOL
 {
 	UIUpdateChildWindows();
 	return FALSE;
 }
 
-LRESULT CMainDlg::OnAutorunClick(const WORD w_notify_code, const WORD w_id, const HWND h_wnd_ctl,
-	BOOL& b_handled)
+auto CMainDlg::OnAutorunClick(const WORD w_notify_code, const WORD w_id, const HWND h_wnd_ctl,
+                              BOOL& b_handled) -> LRESULT
 {
-	m_autorun_ = IsDlgButtonChecked(IDC_AUTORUN) == BST_CHECKED;
+	reg_autorun_ = IsDlgButtonChecked(IDC_AUTORUN) == BST_CHECKED;
 
-	if (m_autorun_)
+	if (reg_autorun_)
 		EnableAutorun();
 	else
 		DisableAutorun();
 
-	AtlTrace("wNotifyCode: %i, w_id: %i, hWndCtl: %i, m_autorun: %i\n", w_notify_code, w_id, h_wnd_ctl, m_autorun_);
+	AtlTrace("wNotifyCode: %i, w_id: %i, hWndCtl: %i, m_autorun: %i\n", w_notify_code, w_id, h_wnd_ctl, reg_autorun_);
 	return 0;
 }
 
-LRESULT CMainDlg::OnDestroy(UINT, WPARAM, LPARAM, BOOL&)
+auto CMainDlg::OnDestroy(UINT, WPARAM, LPARAM, BOOL&) -> LRESULT
 {
 	// unregister message filtering and idle updates
 	CMessageLoop* p_loop = app_module.GetMessageLoop();
@@ -41,89 +40,89 @@ LRESULT CMainDlg::OnDestroy(UINT, WPARAM, LPARAM, BOOL&)
 	return 0;
 }
 
-LRESULT CMainDlg::OnOK(WORD, WORD w_id, HWND, BOOL&)
+auto CMainDlg::OnOK(WORD, WORD w_id, HWND, BOOL&) -> LRESULT
 {
 	ShowWindow(SW_HIDE);
 	return 0;
 }
 
-LRESULT CMainDlg::OnAbout(WORD, WORD, HWND, BOOL&)
+auto CMainDlg::OnAbout(WORD, WORD, HWND, BOOL&) -> LRESULT
 {
 	ShowWindow(SW_SHOW);
 	return TRUE;
 }
 
-LRESULT CMainDlg::OnExit(WORD, const WORD w_id, HWND, BOOL&)
+auto CMainDlg::OnExit(WORD, const WORD w_id, HWND, BOOL&) -> LRESULT
 {
 	CloseDialog(w_id);
 	return TRUE;
 }
 
-LRESULT CMainDlg::OnTimer(UINT, WPARAM w_param, LPARAM, BOOL& b_handled)
+auto CMainDlg::OnTimer(UINT, WPARAM w_param, LPARAM, BOOL& b_handled) -> LRESULT
 {
-	if (m_animate_item_ >= m_animate_icons_.size())
-		m_animate_item_ = 0;
+	if (animate_item_ >= animate_icons_.size())
+		animate_item_ = 0;
 
-	const auto icn = CloneIcon(m_animate_icons_[m_animate_item_]);
+	const auto icn = CloneIcon(animate_icons_[animate_item_]);
 
-	m_ti_.ChangeIcon(icn);
-	m_animate_item_++;
+	taskbar_icon_.ChangeIcon(icn);
+	animate_item_++;
 
 	return TRUE;
 }
 
-LRESULT CMainDlg::OnHotkey(UINT, const WPARAM w_param, LPARAM, BOOL& b_handled)
+auto CMainDlg::OnHotkey(UINT, const WPARAM w_param, LPARAM, BOOL& b_handled) -> LRESULT
 {
-	if (w_param == m_hot_key_)
+	if (w_param == hot_key_)
 	{
-		m_dw_current_tick_ = GetTickCount();
-		if (m_dw_current_tick_ - m_dw_old_tick_ <= 350)
-			m_hotkeyValid++;
+		current_tick_ = GetTickCount();
+		if (current_tick_ - previous_tick_ <= 350)
+			hotkey_is_valid_++;
 		else
-			m_hotkeyValid = 0;
+			hotkey_is_valid_ = 0;
 
-		if (m_hotkeyValid == 2)
+		if (hotkey_is_valid_ == 2)
 			ReadAndQueueClipboard();
 
-		m_dw_old_tick_ = m_dw_current_tick_;
+		previous_tick_ = current_tick_;
 	}
 
 	b_handled = FALSE;
 	return TRUE;
 }
 
-LRESULT CMainDlg::OnSize(UINT, const WPARAM w_param, LPARAM, BOOL& b_handled)
+auto CMainDlg::OnSize(UINT, const WPARAM w_param, LPARAM, BOOL& b_handled) -> LRESULT
 {
 	if (w_param == SIZE_MINIMIZED) ShowWindow(SW_HIDE);
 	b_handled = FALSE;
 	return 0;
 }
 
-LRESULT CMainDlg::OnTaskIconClick(LPARAM, BOOL&)
+auto CMainDlg::OnTaskIconClick(LPARAM, BOOL&) -> LRESULT
 {
 	ShowWindow(SW_SHOW);
 	return TRUE;
 }
 
-LRESULT CMainDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&)
+auto CMainDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&) -> LRESULT
 {
 	// center the dialog on the screen
 	CenterWindow();
 
-	m_autorun_ = IsAutorunEnabled();
-	CheckDlgButton(IDC_AUTORUN, m_autorun_ ? BST_CHECKED : BST_UNCHECKED);
+	reg_autorun_ = IsAutorunEnabled();
+	CheckDlgButton(IDC_AUTORUN, reg_autorun_ ? BST_CHECKED : BST_UNCHECKED);
 
 
 	//Install taskbar
 	HICON h_animate_icon = AtlLoadIconImage(IDI_ICON1, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
-	m_animate_icons_.push_back(h_animate_icon);
+	animate_icons_.push_back(h_animate_icon);
 	h_animate_icon = AtlLoadIconImage(IDI_ICON2, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
-	m_animate_icons_.push_back(h_animate_icon);
+	animate_icons_.push_back(h_animate_icon);
 	h_animate_icon = AtlLoadIconImage(IDI_ICON3, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
-	m_animate_icons_.push_back(h_animate_icon);
+	animate_icons_.push_back(h_animate_icon);
 	h_animate_icon = AtlLoadIconImage(IDI_ICON4, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
-	m_animate_icons_.push_back(h_animate_icon);
-	m_ti_.Install(m_hWnd, 1, IDR_TASKBAR);
+	animate_icons_.push_back(h_animate_icon);
+	taskbar_icon_.Install(m_hWnd, 1, IDR_TASKBAR);
 
 
 	// set icons
@@ -149,7 +148,7 @@ LRESULT CMainDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&)
 			bool reset = false;
 			while (true)
 			{
-				while (!m_messages_.empty())
+				while (!messages_queue_.empty())
 				{
 					SetTimer(WM_ICON_ANIMATE_START, 500, nullptr);
 
@@ -165,7 +164,7 @@ LRESULT CMainDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&)
 				{
 					const auto icn = AtlLoadIconImage(IDR_TASKBAR, LR_DEFAULTCOLOR, GetSystemMetrics(SM_CXICON),
 						GetSystemMetrics(SM_CYICON));
-					m_ti_.ChangeIcon(icn);
+					taskbar_icon_.ChangeIcon(icn);
 					reset = false;
 				}
 
@@ -175,20 +174,17 @@ LRESULT CMainDlg::OnInitDialog(UINT, WPARAM, LPARAM, BOOL&)
 		return TRUE;
 }
 
-void CMainDlg::CloseDialog(const int n_val)
+auto CMainDlg::CloseDialog(const int n_val) -> void
 {
 	DestroyWindow();
 	PostQuitMessage(n_val);
 }
 
-
-
-
 // Private
 auto CMainDlg::GetNextMessage() -> std::string
 {
-	auto msg = m_messages_.front();
-	m_messages_.pop();
+	auto msg = messages_queue_.front();
+	messages_queue_.pop();
 
 	UpdateTaskbarTooltip();
 		
@@ -197,8 +193,8 @@ auto CMainDlg::GetNextMessage() -> std::string
 
 auto CMainDlg::UpdateTaskbarTooltip() -> LRESULT
 {
-	const std::wstring tskbar = L"Items Queued: " + std::to_wstring(m_messages_.size());
-	m_ti_.ChangeTooltip(const_cast<LPTSTR>(tskbar.c_str()));
+	const std::wstring tskbar = L"Items Queued: " + std::to_wstring(messages_queue_.size());
+	taskbar_icon_.ChangeTooltip(const_cast<LPTSTR>(tskbar.c_str()));
 
 	const auto dbgstr = tskbar + L"\n";
 	OutputDebugString(dbgstr.c_str());
@@ -208,10 +204,10 @@ auto CMainDlg::UpdateTaskbarTooltip() -> LRESULT
 
 auto CMainDlg::RegisterHotkey() -> LRESULT
 {
-	m_hot_key_ = GlobalAddAtom(L"ReadAssistAtom");
-	if (m_hot_key_)
+	hot_key_ = GlobalAddAtom(L"ReadAssistAtom");
+	if (hot_key_)
 	{
-		RegisterHotKey(m_hWnd, m_hot_key_, MOD_CONTROL, 0);
+		RegisterHotKey(m_hWnd, hot_key_, MOD_CONTROL, 0);
 	}
 
 	return TRUE;
@@ -229,7 +225,7 @@ auto CMainDlg::ReadAndQueueClipboard() -> LRESULT
 		CloseClipboard();
 	}
 
-	m_messages_.push(fromClipboard);
+	messages_queue_.push(fromClipboard);
 	UpdateTaskbarTooltip();
 
 	return TRUE;
