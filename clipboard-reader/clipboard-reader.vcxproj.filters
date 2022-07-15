@@ -21,6 +21,9 @@
     <ClCompile Include="clipboard-reader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

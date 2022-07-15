@@ -19,7 +19,7 @@ HRESULT Run(LPTSTR /*lpstrCmdLine*/ = nullptr, const int n_cmd_show = SW_SHOWDEF
 	CMessageLoop message_loop;
 	app_module.AddMessageLoop(&message_loop);
 
-	c_main_dlg dlg_main;
+	CMainDlg dlg_main;
 
 	if(dlg_main.Create(nullptr) == nullptr)
 	{
