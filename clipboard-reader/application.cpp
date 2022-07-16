@@ -3,23 +3,14 @@
 
 #include "stdafx.h"
 
-#include <atlframe.h>
-#include <atlctrls.h>
-#include <atldlgs.h>
-
-#include "resource.h"
-
-#include "dialog.h"
-
 CAppModule app_module;
-
 
 HRESULT Run(LPTSTR /*lpstrCmdLine*/ = nullptr, const int n_cmd_show = SW_SHOWDEFAULT)
 {
 	CMessageLoop message_loop;
 	app_module.AddMessageLoop(&message_loop);
 
-	c_main_dlg dlg_main;
+	CMainDlg dlg_main;
 
 	if(dlg_main.Create(nullptr) == nullptr)
 	{

@@ -12,7 +12,7 @@ public:
 
 	~CSpeech() noexcept;
 
-	LRESULT TextToSpeech();
+	auto TextToSpeech() -> LRESULT;
 };
 
 inline CSpeech::CSpeech(std::string message): message_(std::move(message))
@@ -29,7 +29,7 @@ inline CSpeech::~CSpeech() noexcept
 	CoUninitialize();
 }
 
-inline LRESULT CSpeech::TextToSpeech()
+inline auto CSpeech::TextToSpeech() -> LRESULT
 {	
 	ISpVoice * p_voice = nullptr;
 
